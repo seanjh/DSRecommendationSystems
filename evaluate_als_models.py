@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+import math
 import config
+import configspark as spark
 
 from pyspark.mllib.recommendation import ALS, Rating
 
@@ -9,7 +11,7 @@ RANKS = [10, 20, 30, 40, 50]
 LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
 ITERATIONS = 10
 
-sc = config.SPARK_CONTEXT
+sc = spark.SPARK_CONTEXT
 
 
 def prepare_data(data):
@@ -24,19 +26,22 @@ def prepare_validation(validation):
     return validation.map(lambda p: (p[0], p[1]))
 
 
-def report_mse_results(outfile, rank, lambda_value, mse):
-    print("Rank=%d, Lambda=%0.2f, MSE=%s" % (rank, lambda_value, mse))
-    outfile.write("%d,%f,%f\n" % (rank, lambda_value, mse))
+def report_mse_results(outfile, rank, lambda_value, mse, rmse):
+    print("Rank=%d, Lambda=%0.2f, MSE=%f, RMSE=%f" % (
+          rank, lambda_value, mse, rmse))
+    outfile.write("%d,%f,%f,%f\n" % (rank, lambda_value, mse, rmse))
 
 
 def evaluate_parameters(train, validation, ranks, lambda_values):
     for r in ranks:
         for l in lambda_values:
             model = ALS.train(train, r, ITERATIONS, l)
+            mse, rmse = evaluate_model(model, train, validation)
             yield {
                 "rank": r,
                 "lambda": l,
-                "mse": evaluate_model(model, train, validation),
+                "mse": mse,
+                "rmse": rmse,
                 "model": model
             }
 
@@ -48,8 +53,8 @@ def evaluate_model(model, train, validation):
         .predictAll(prepare_validation(validation))
         .map(lambda r: ((r[0], r[1]), r[2])))
     ratesAndPreds = train.map(lambda r: ((r[0], r[1]), r[2])).join(predictions)
-    MSE = ratesAndPreds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
-    return MSE
+    mse = ratesAndPreds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
+    return mse, math.sqrt(mse)
 
 
 def evaluate_models():
@@ -63,8 +68,8 @@ def evaluate_models():
     ratings_test_text = sc.textFile(config.TEST_FILE)
     ratings_test = prepare_data(ratings_validation_text)
 
-    best_model = None
-    min_mse = None
+    min_rmse = None
+    best_result = None
     with open(config.RESULTS_FILE, "w") as outfile:
         for result in evaluate_parameters(ratings_train, ratings_validation,
                                           RANKS, LAMBDA_VALUES):
@@ -72,18 +77,22 @@ def evaluate_models():
                 outfile,
                 result.get("rank"),
                 result.get("lambda"),
-                result.get("mse"))
+                result.get("mse"),
+                result.get("rmse")
+            )
 
-            if best_model is None or result.get("mse") < min_mse:
-                best_model = result.get("model")
-                min_mse = result.get("mse")
+            if best_result is None or result.get("rmse") < min_rmse:
+                best_result = result
+                min_rmse = result.get("rmse")
 
-    return best_model
+    return best_result
 
 
 def main():
-    model = evaluate_models()
-    model.save(sc, config.ALS_MODEL_FILE)
+    best_model = evaluate_models()
+    with open(config.ALS_BEST_PARAMS_FILE, "w") as outfile:
+        outfile.write("%s,%s\n" % ("rank", "lambda"))
+        outfile.write("%s,%s" % (best_model.get("rank"), best_model.get("lambda")))
 
 if __name__ == "__main__":
     main()
