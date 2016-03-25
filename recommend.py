@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 def main():
     # create the training ratings RDD
     # load user ratings from filename specified on command line (sys.argv[1])

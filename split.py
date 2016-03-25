@@ -4,19 +4,14 @@ import os
 import sys
 import config
 
-ML_USERID_INDEX = 0
-ML_MOVIEID_INDEX = 1
-ML_TAG_INDEX = 2
-ML_TIMESTAMP_INDEX = 3
-
 
 def convert_ml_10m_line(line):
     parts = line.strip().split("::")
     return [
-        int(parts[ML_USERID_INDEX]),
-        int(parts[ML_MOVIEID_INDEX]),
-        float(parts[ML_TAG_INDEX]),
-        int(parts[ML_TIMESTAMP_INDEX])
+        int(parts[config.ML_USERID_INDEX]),
+        int(parts[config.ML_MOVIEID_INDEX]),
+        float(parts[config.ML_RATING_INDEX]),
+        int(parts[config.ML_TIMESTAMP_INDEX])
     ]
 
 
