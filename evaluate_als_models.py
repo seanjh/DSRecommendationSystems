@@ -32,23 +32,27 @@ def report_mse_results(outfile, rank, lambda_value, mse):
 def evaluate_parameters(train, validation, ranks, lambda_values):
     for r in ranks:
         for l in lambda_values:
+            model = ALS.train(train, r, ITERATIONS, l)
             yield {
                 "rank": r,
                 "lambda": l,
-                "mse": train_evaluate_als(train, validation, r, ITERATIONS, l)
+                "mse": evaluate_model(model, train, validation),
+                "model": model
             }
 
 
 # Evaluate the model on training data
-def train_evaluate_als(train, validation, rank, iterations_num, lambda_val):
-    model = ALS.train(train, rank, iterations_num, lambda_val)
-    predictions = model.predictAll(prepare_validation(validation)).map(lambda r: ((r[0], r[1]), r[2]))
+def evaluate_model(model, train, validation):
+    predictions = (
+        model
+        .predictAll(prepare_validation(validation))
+        .map(lambda r: ((r[0], r[1]), r[2])))
     ratesAndPreds = train.map(lambda r: ((r[0], r[1]), r[2])).join(predictions)
     MSE = ratesAndPreds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
     return MSE
 
 
-def main():
+def evaluate_models():
     # Load and parse the data
     ratings_train_text = sc.textFile(config.TRAIN_FILE)
     ratings_train = prepare_data(ratings_train_text)
@@ -59,6 +63,8 @@ def main():
     ratings_test_text = sc.textFile(config.TEST_FILE)
     ratings_test = prepare_data(ratings_validation_text)
 
+    best_model = None
+    min_mse = None
     with open(config.RESULTS_FILE, "w") as outfile:
         for result in evaluate_parameters(ratings_train, ratings_validation,
                                           RANKS, LAMBDA_VALUES):
@@ -66,9 +72,18 @@ def main():
                 outfile,
                 result.get("rank"),
                 result.get("lambda"),
-                result.get("mse")
-            )
+                result.get("mse"))
 
+            if best_model is None or result.get("mse") < min_mse:
+                best_model = result.get("model")
+                min_mse = result.get("mse")
+
+    return best_model
+
+
+def main():
+    model = evaluate_models()
+    model.save(sc, config.ALS_MODEL_FILE)
 
 if __name__ == "__main__":
     main()
