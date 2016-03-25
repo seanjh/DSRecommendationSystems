@@ -24,15 +24,19 @@ def prepare_validation(validation):
     return validation.map(lambda p: (p[0], p[1]))
 
 
-def report_mse_results(rank, lambda_value, mse):
+def report_mse_results(outfile, rank, lambda_value, mse):
     print("Rank=%d, Lambda=%0.2f, MSE=%s" % (rank, lambda_value, mse))
+    outfile.write("%d,%f,%f\n" % (rank, lambda_value, mse))
 
 
 def evaluate_parameters(train, validation, ranks, lambda_values):
     for r in ranks:
         for l in lambda_values:
-            mse = train_evaluate_als(train, validation, r, ITERATIONS, l)
-            report_mse_results(r, l, mse)
+            yield {
+                "rank": r,
+                "lambda": l,
+                "mse": train_evaluate_als(train, validation, r, ITERATIONS, l)
+            }
 
 
 # Evaluate the model on training data
@@ -55,7 +59,15 @@ def main():
     ratings_test_text = sc.textFile(config.TEST_FILE)
     ratings_test = prepare_data(ratings_validation_text)
 
-    evaluate_parameters(ratings_train, ratings_validation, RANKS, LAMBDA_VALUES)
+    with open(config.RESULTS_FILE, "w") as outfile:
+        for result in evaluate_parameters(ratings_train, ratings_validation,
+                                          RANKS, LAMBDA_VALUES):
+            report_mse_results(
+                outfile,
+                result.get("rank"),
+                result.get("lambda"),
+                result.get("mse")
+            )
 
 
 if __name__ == "__main__":
