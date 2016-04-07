@@ -2,32 +2,16 @@
 
 import os
 import sys
-
-DATA_PATH = os.path.abspath(
-    os.path.join(os.path.realpath(__file__), "..", "data"))
-MOVIE_LENS_10M_PATH = os.path.join(DATA_PATH, "ml-10M100K")
-MOVIE_LENS_10M_RATINGS = os.path.join(MOVIE_LENS_10M_PATH, "ratings.dat")
-MOVIE_LENS_10M_RATINGS_TRAIN = os.path.join(MOVIE_LENS_10M_PATH,
-                                            "ratings-train.dat")
-MOVIE_LENS_10M_RATINGS_VALIDATE = os.path.join(MOVIE_LENS_10M_PATH,
-                                               "ratings-test.dat")
-MOVIE_LENS_10M_RATINGS_TEST = os.path.join(MOVIE_LENS_10M_PATH,
-                                           "ratings-validation.dat")
-
-
-ML_USERID_INDEX = 0
-ML_MOVIEID_INDEX = 1
-ML_TAG_INDEX = 2
-ML_TIMESTAMP_INDEX = 3
+import config
 
 
 def convert_ml_10m_line(line):
     parts = line.strip().split("::")
     return [
-        int(parts[ML_USERID_INDEX]),
-        int(parts[ML_MOVIEID_INDEX]),
-        float(parts[ML_TAG_INDEX]),
-        int(parts[ML_TIMESTAMP_INDEX])
+        int(parts[config.ML_USERID_INDEX]),
+        int(parts[config.ML_MOVIEID_INDEX]),
+        float(parts[config.ML_RATING_INDEX]),
+        int(parts[config.ML_TIMESTAMP_INDEX])
     ]
 
 
@@ -54,23 +38,23 @@ def write_ml_line(index, line, train_file, validation_file, test_file):
 
 
 def main():
-    print("Loading %s" % MOVIE_LENS_10M_RATINGS)
-    with open(MOVIE_LENS_10M_RATINGS) as infile:
+    print("Loading %s" % config.ML_RATINGS)
+    with open(config.ML_RATINGS) as infile:
         data = [convert_ml_10m_line(line) for line in infile]
-        print("Sorting %s" % MOVIE_LENS_10M_RATINGS)
+        print("Sorting %s" % config.ML_RATINGS)
         data = sort_ml_10m(data)
 
-    train_out = open(MOVIE_LENS_10M_RATINGS_TRAIN, 'w')
-    validation_out = open(MOVIE_LENS_10M_RATINGS_VALIDATE, 'w')
-    test_out = open(MOVIE_LENS_10M_RATINGS_TEST, 'w')
+    train_out = open(config.ML_RATINGS_TRAIN, 'w')
+    validation_out = open(config.ML_RATINGS_VALIDATION, 'w')
+    test_out = open(config.ML_RATINGS_TEST, 'w')
 
     print("Writing train/validation/test files")
     for index, item in enumerate(data):
         write_ml_line(index, item, train_out, validation_out, test_out)
 
-    print("\n\nFinished writing train %s" % MOVIE_LENS_10M_RATINGS_TRAIN)
-    print("Finished writing validation %s" % MOVIE_LENS_10M_RATINGS_VALIDATE)
-    print("Finished writing test %s\n\n" % MOVIE_LENS_10M_RATINGS_TEST)
+    print("\n\nFinished writing train %s" % config.ML_RATINGS_TRAIN)
+    print("Finished writing validation %s" % config.ML_RATINGS_VALIDATION)
+    print("Finished writing test %s\n\n" % config.ML_RATINGS_TEST)
     train_out.close()
     validation_out.close()
     test_out.close()
