@@ -2,62 +2,85 @@
 
 import os
 import sys
+import shutil
 import config
+from configspark import SPARK_CONTEXT as sc
+
+
+TRAIN_UPPER_LIMIT = 6000000
+VALIDATION_LOWER_LIMIT = 6000000
+VALIDATION_UPPER_LIMIT = 8000000
+TEST_LOWER_LIMIT = 8000000
+RATINGS_SORTED_DATA = 0
+RATINGS_SORTED_INDEX = 1
+
+
+def clean_path(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
+def clean():
+    clean_path(config.ML_RATINGS_TRAIN)
+    clean_path(config.ML_RATINGS_VALIDATION)
+    clean_path(config.ML_RATINGS_TEST)
 
 
 def convert_ml_10m_line(line):
     parts = line.strip().split("::")
-    return [
+    return (
         int(parts[config.ML_USERID_INDEX]),
         int(parts[config.ML_MOVIEID_INDEX]),
         float(parts[config.ML_RATING_INDEX]),
         int(parts[config.ML_TIMESTAMP_INDEX])
-    ]
-
-
-def sort_ml_10m(data):
-    return sorted(
-        data,
-        cmp=lambda x, y: cmp(x[ML_TIMESTAMP_INDEX], y[ML_TIMESTAMP_INDEX])
     )
 
 
-def stringify(item):
-    return ",".join([("%s" % val) for val in item]) + "\n"
+def row_timestamp(row):
+    return row[config.ML_TIMESTAMP_INDEX]
 
 
-def write_ml_line(index, line, train_file, validation_file, test_file):
-    if index < 6000000:
-        train_file.write(stringify(line))
-    elif index >= 6000000 and index < 8000000:
-        validation_file.write(stringify(line))
-    else:
-        test_file.write(stringify(line))
-    sys.stdout.write("Writing line # %s\t\t\t\t\t\r" % "{:,}".format(index))
-    sys.stdout.flush()
+def train_row(row):
+    return row[RATINGS_SORTED_INDEX] < TRAIN_UPPER_LIMIT
+
+
+def validation_row(row):
+    return (
+        row[RATINGS_SORTED_INDEX] >= VALIDATION_LOWER_LIMIT and
+        row[RATINGS_SORTED_INDEX] < VALIDATION_UPPER_LIMIT
+    )
+
+
+def test_row(row):
+    return row[RATINGS_SORTED_INDEX] > TEST_LOWER_LIMIT
+
+
+def drop_index(row):
+    return row[RATINGS_SORTED_DATA]
 
 
 def main():
-    print("Loading %s" % config.ML_RATINGS)
-    with open(config.ML_RATINGS) as infile:
-        data = [convert_ml_10m_line(line) for line in infile]
-        print("Sorting %s" % config.ML_RATINGS)
-        data = sort_ml_10m(data)
+    clean()
 
-    train_out = open(config.ML_RATINGS_TRAIN, 'w')
-    validation_out = open(config.ML_RATINGS_VALIDATION, 'w')
-    test_out = open(config.ML_RATINGS_TEST, 'w')
+    ratings_file = sc.textFile(config.ML_RATINGS)
+    ratings_full = ratings_file.map(convert_ml_10m_line)
+    ratings_full_sorted = ratings_full.sortBy(row_timestamp).zipWithIndex()
 
-    print("Writing train/validation/test files")
-    for index, item in enumerate(data):
-        write_ml_line(index, item, train_out, validation_out, test_out)
+    ratings_train = ratings_full_sorted.filter(train_row).map(drop_index)
+    print("\nTraining data sample:\n%s" % ratings_train.take(5))
+    ratings_train.saveAsTextFile(config.ML_RATINGS_TRAIN)
 
-    print("\n\nFinished writing train %s" % config.ML_RATINGS_TRAIN)
-    print("Finished writing validation %s" % config.ML_RATINGS_VALIDATION)
-    print("Finished writing test %s\n\n" % config.ML_RATINGS_TEST)
-    train_out.close()
-    validation_out.close()
-    test_out.close()
+    ratings_validation = (
+        ratings_full_sorted
+        .filter(validation_row)
+        .map(drop_index)
+    )
+    print("\nValidation data sample:\n%s" % ratings_validation.take(5))
+    ratings_validation.saveAsTextFile(config.ML_RATINGS_VALIDATION)
+
+    ratings_test = ratings_full_sorted.filter(test_row).map(drop_index)
+    print("\nTest data sample:\n%s" % ratings_test.take(5))
+    ratings_test.saveAsTextFile(config.ML_RATINGS_TEST)
 
 
 if __name__ == "__main__":
