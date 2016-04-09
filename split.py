@@ -26,7 +26,11 @@ def clean():
     clean_path(config.ML_RATINGS_TEST)
 
 
-def convert_ml_10m_line(line):
+def convert_to_string(row):
+    return "::".join([str(val) for val in row])
+
+
+def convert_from_string(line):
     parts = line.strip().split("::")
     return (
         int(parts[config.ML_USERID_INDEX]),
@@ -63,10 +67,15 @@ def main():
     clean()
 
     ratings_file = sc.textFile(config.ML_RATINGS)
-    ratings_full = ratings_file.map(convert_ml_10m_line)
+    ratings_full = ratings_file.map(convert_from_string)
     ratings_full_sorted = ratings_full.sortBy(row_timestamp).zipWithIndex()
 
-    ratings_train = ratings_full_sorted.filter(train_row).map(drop_index)
+    ratings_train = (
+        ratings_full_sorted
+        .filter(train_row)
+        .map(drop_index)
+        .map(convert_to_string)
+    )
     print("\nTraining data sample:\n%s" % ratings_train.take(5))
     ratings_train.saveAsTextFile(config.ML_RATINGS_TRAIN)
 
@@ -74,11 +83,17 @@ def main():
         ratings_full_sorted
         .filter(validation_row)
         .map(drop_index)
+        .map(convert_to_string)
     )
     print("\nValidation data sample:\n%s" % ratings_validation.take(5))
     ratings_validation.saveAsTextFile(config.ML_RATINGS_VALIDATION)
 
-    ratings_test = ratings_full_sorted.filter(test_row).map(drop_index)
+    ratings_test = (
+        ratings_full_sorted
+        .filter(test_row)
+        .map(drop_index)
+        .map(convert_to_string)
+    )
     print("\nTest data sample:\n%s" % ratings_test.take(5))
     ratings_test.saveAsTextFile(config.ML_RATINGS_TEST)
 
