@@ -4,6 +4,7 @@ import os
 import sys
 import shutil
 import config
+import movielens_parse as mlparse
 from configspark import SPARK_CONTEXT as sc
 
 
@@ -24,20 +25,6 @@ def clean():
     clean_path(config.ML_RATINGS_TRAIN)
     clean_path(config.ML_RATINGS_VALIDATION)
     clean_path(config.ML_RATINGS_TEST)
-
-
-def convert_to_string(row):
-    return "::".join([str(val) for val in row])
-
-
-def convert_from_string(line):
-    parts = line.strip().split("::")
-    return (
-        int(parts[config.ML_USERID_INDEX]),
-        int(parts[config.ML_MOVIEID_INDEX]),
-        float(parts[config.ML_RATING_INDEX]),
-        int(parts[config.ML_TIMESTAMP_INDEX])
-    )
 
 
 def row_timestamp(row):
@@ -67,14 +54,14 @@ def main():
     clean()
 
     ratings_file = sc.textFile(config.ML_RATINGS)
-    ratings_full = ratings_file.map(convert_from_string)
+    ratings_full = ratings_file.map(mlparse.parse_line)
     ratings_full_sorted = ratings_full.sortBy(row_timestamp).zipWithIndex()
 
     ratings_train = (
         ratings_full_sorted
         .filter(train_row)
         .map(drop_index)
-        .map(convert_to_string)
+        .map(mlparse.parsed_string)
     )
     print("\nTraining data sample:\n%s" % ratings_train.take(5))
     ratings_train.saveAsTextFile(config.ML_RATINGS_TRAIN)
@@ -83,7 +70,7 @@ def main():
         ratings_full_sorted
         .filter(validation_row)
         .map(drop_index)
-        .map(convert_to_string)
+        .map(mlparse.parsed_string)
     )
     print("\nValidation data sample:\n%s" % ratings_validation.take(5))
     ratings_validation.saveAsTextFile(config.ML_RATINGS_VALIDATION)
@@ -92,7 +79,7 @@ def main():
         ratings_full_sorted
         .filter(test_row)
         .map(drop_index)
-        .map(convert_to_string)
+        .map(mlparse.parsed_string)
     )
     print("\nTest data sample:\n%s" % ratings_test.take(5))
     ratings_test.saveAsTextFile(config.ML_RATINGS_TEST)

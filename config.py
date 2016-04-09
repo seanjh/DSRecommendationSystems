@@ -3,11 +3,6 @@ import os
 DATA_PATH = os.path.abspath(
     os.path.join(os.path.realpath(__file__), "..", "data"))
 
-ML_USERID_INDEX = 0
-ML_MOVIEID_INDEX = 1
-ML_RATING_INDEX = 2
-ML_TIMESTAMP_INDEX = 3
-
 ML_DATA_PATH = os.path.join(DATA_PATH, "ml-10M100K")
 ML_RATINGS = os.path.join(ML_DATA_PATH, "ratings.dat")
 ML_MOVIES = os.path.join(ML_DATA_PATH, "movies.dat")
@@ -38,3 +33,4 @@ if not os.path.exists(RESULTS_PATH):
 
 RESULTS_FILE = os.path.join(RESULTS_PATH, "als_model_evaluation.csv")
 ALS_BEST_PARAMS_FILE = os.path.join(RESULTS_PATH, "als_params.csv")
+ML_MODEL = os.path.join(RESULTS_PATH, "movielens.mllib.model")
