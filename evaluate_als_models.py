@@ -18,15 +18,19 @@ RATING_INDEX = config.ML_RATING_INDEX
 sc = spark.SPARK_CONTEXT
 
 
-def prepare_data(data, sep=","):
+def convert_to_rating(row):
+    return Rating(
+        int(row[USERID_INDEX]),
+        int(row[MOVIEID_INDEX]),
+        float(row[RATING_INDEX])
+    )
+
+
+def prepare_data(data):
     return (
         data
-        .map(lambda l: l.split(sep))
-        .map(lambda l: Rating(
-            int(l[USERID_INDEX]),
-            int(l[MOVIEID_INDEX]),
-            float(l[RATING_INDEX])
-        ))
+        .map(lambda row: row.strip().split("::"))
+        .map(convert_to_rating)
     )
 
 
@@ -52,7 +56,7 @@ def evaluate_parameters(train, validation, ranks, iterations, lambda_values):
     for rank in ranks:
         for lambda_val in lambda_values:
             model = ALS.train(train, rank, iterations, lambda_val)
-            mse, rmse = evaluate_model(model, train, validation)
+            mse, rmse = evaluate_model(model, validation)
             yield {
                 "rank": rank,
                 "lambda": lambda_val,
@@ -62,30 +66,34 @@ def evaluate_parameters(train, validation, ranks, iterations, lambda_values):
             }
 
 
-# Evaluate the model on training data
-def evaluate_model(model, train, validation):
-    test = prepare_test(validation)
+# Evaluate the model on test data
+def evaluate_model(model, validation):
+    users_products = prepare_test(validation)
+    print("\nValidation U+P:\n%s" % users_products.take(10))
+    users_products_ratings = validation.map(user_product_rating)
+    # test_grouped = validation.map(user_product_rating)
+    print("\nTest Validation U+P+R:\n%s" % users_products_ratings.take(10))
 
-    predictions = (
-        model
-        .predictAll(test)
-        .map(user_product_rating))
+    # train_ratings = train.map(user_product_rating)
+    # print("\nTrain ((user, movie), rating):\n%s" % train_ratings.take(10))
+
+    predictions = model.predictAll(users_products).map(user_product_rating)
+    print("\nPredictions U+P+R:\n%s" % predictions.take(10))
 
     # RDD of [((user, movie), (real_rating, predicted_rating)), ...]
-    ratesAndPreds = (
-        train
-        .map(user_product_rating)
-        .join(predictions))
+    ratesAndPreds = users_products_ratings.join(predictions)
+    print("\nRates and predictions joined:\n%s" % ratesAndPreds.take(10))
+
     mse = ratesAndPreds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
     return mse, math.sqrt(mse)
 
 
 def evaluate():
     # Load and parse the data
-    ratings_train_text = sc.textFile(config.TRAIN_FILE)
+    ratings_train_text = sc.textFile(config.ML_RATINGS_TRAIN)
     ratings_train = prepare_data(ratings_train_text)
 
-    ratings_validation_text = sc.textFile(config.VALIDATION_FILE)
+    ratings_validation_text = sc.textFile(config.ML_RATINGS_VALIDATION)
     ratings_validation = prepare_data(ratings_validation_text)
 
     # ratings_test_text = sc.textFile(config.TEST_FILE)
