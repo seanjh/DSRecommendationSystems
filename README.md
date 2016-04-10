@@ -15,15 +15,15 @@ To generate the ALS recommendation Model, first download the [MovieLens dataset]
 
 
 ### Task 1 - ALS Model Parameter Evaluation
-Given the train-validation-test splits, run the `evaluate_als_models.py` script.
+Given the train-validation-test splits, run the `ml_evaluate_models.py` script.
 
-    $ ./evaluate_als_models.py
+    $ ./ml_evaluate_models.py
 
 This script will build ALS models from the training set using a range of parameters. The ALS Model parameters and Mean Squared Error (MSE) are written to `results/als_model_evaluation.txt`. The model with the lowest MSE is saved to disk at `results/als_recommended_model`.
 
 
 ### Task 1 - Testing Model Performance
-The `evaluate_als_models.py` script will save the best model to disk in `results/`. To evaluate the performance of this model on the test dataset split, execute the `test_ml.py` script.
+The `ml_evaluate_models.py` script will save the best model to disk in `results/`. To evaluate the performance of this model on the test dataset split, execute the `test_ml.py` script.
 
     $ ./test_ml.py
 

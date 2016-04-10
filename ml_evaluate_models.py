@@ -3,7 +3,7 @@
 import math
 import config
 import configspark as spark
-import movielens_parse as mlparse
+import ml_parse as mlparse
 from pyspark.mllib.recommendation import ALS
 
 RANKS = [10, 20, 30, 40, 50]

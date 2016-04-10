@@ -3,8 +3,8 @@
 import sys
 import os
 import config
-import evaluate_als_models as model_evaluate
-import movielens_parse as mlparse
+import ml_evaluate_models as model_evaluate
+import ml_parse as mlparse
 
 from pyspark.mllib.recommendation import MatrixFactorizationModel, ALS
 
