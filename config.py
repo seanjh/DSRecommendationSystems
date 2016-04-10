@@ -1,4 +1,10 @@
 import os
+import shutil
+
+
+def clean_path(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
 
 DATA_PATH = os.path.abspath(
     os.path.join(os.path.realpath(__file__), "..", "data"))
@@ -25,5 +31,7 @@ if not os.path.exists(RESULTS_PATH):
 RESULTS_FILE = os.path.join(RESULTS_PATH, "als_model_evaluation.csv")
 ALS_BEST_PARAMS_FILE = os.path.join(RESULTS_PATH, "als_params.csv")
 ML_MODEL = os.path.join(RESULTS_PATH, "movielens.mllib.model")
-# ALS Model iterations
-ITERATIONS = 10
+
+MSD_TRAIN = os.path.join(DATA_PATH, "train_triplets.txt")
+MSD_USERID_MAP = os.path.join(RESULTS_PATH, "msd_user_ids.json")
+MSD_SONGID_MAP = os.path.join(RESULTS_PATH, "msd_song_ids.json")

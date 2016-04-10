@@ -2,7 +2,6 @@
 
 import os
 import sys
-import shutil
 import config
 import ml_parse
 from configspark import SPARK_CONTEXT as sc
@@ -16,15 +15,10 @@ RATINGS_SORTED_DATA = 0
 RATINGS_SORTED_INDEX = 1
 
 
-def clean_path(path):
-    if os.path.exists(path):
-        shutil.rmtree(path)
-
-
 def clean():
-    clean_path(config.ML_RATINGS_TRAIN)
-    clean_path(config.ML_RATINGS_VALIDATION)
-    clean_path(config.ML_RATINGS_TEST)
+    config.clean_path(config.ML_RATINGS_TRAIN)
+    config.clean_path(config.ML_RATINGS_VALIDATION)
+    config.clean_path(config.ML_RATINGS_TEST)
 
 
 def row_timestamp(row):

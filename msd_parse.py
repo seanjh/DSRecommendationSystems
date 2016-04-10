@@ -1,3 +1,5 @@
+import json
+import config
 from pyspark.mllib.recommendation import Rating
 
 # user, song, play count triplets
@@ -8,7 +10,7 @@ PLAYCOUNT_INDEX = 2
 
 
 def parse_line(line):
-    parts = line.strip().split("::")
+    parts = line.strip().split("\t")
     return (
         parts[USERID_INDEX],
         parts[SONGID_INDEX],
@@ -20,23 +22,42 @@ def rating_convert(row):
     return Rating(
         int(row[USERID_INDEX]),
         int(row[SONGID_INDEX]),
-        float(row[PLAYCOUNT_INDEX])
+        int(row[PLAYCOUNT_INDEX])
     )
 
 
-def convert_ids_to_int(parsed_rdd):
-    user_ids_int = (
-        parsed_rdd
-        .map(lambda row: row[USERID_INDEX])
-        .distinct()
-        .zipWithUniqueId())
-    print(user_ids_int.take(50))
+def make_id_map(ids_rdd):
+    ids_ints = ids_rdd.distinct().zipWithUniqueId()
+    return dict(ids_ints.collect())
 
-    # song_ids_int = (
-    #     parsed_rdd
-    #     .map(lambda row: row[SONGID_INDEX])
-    #     .distinct()
-    #     .zipWithUniqueId())
-    # print(song_ids_int.take(50))
+
+def make_users_map(rdd):
+    users_map = make_id_map(rdd.map(lambda row: row[USERID_INDEX]))
+    with open(config.MSD_USERID_MAP, 'w') as outfile:
+        json.dump(users_map, outfile)
+    return users_map
+
+
+def make_songs_map(rdd):
+    songs_map = make_id_map(rdd.map(lambda row: row[SONGID_INDEX]))
+    with open(config.MSD_SONGID_MAP, 'w') as outfile:
+        json.dump(songs_map, outfile)
+    return songs_map
+
+
+def make_row_coverter(users, songs):
+    def convert_row(row):
+        return (
+            int(users.get(str(row[USERID_INDEX]))),
+            int(songs.get(str(row[SONGID_INDEX]))),
+            row[PLAYCOUNT_INDEX]
+        )
+    return convert_row
+
+
+def replace_raw_ids(train, users, songs):
+    convert_row_func = make_row_coverter(users, songs)
+    return train.map(convert_row_func)
+
 
 # convert user_id, song_id to integer
