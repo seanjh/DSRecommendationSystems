@@ -8,7 +8,6 @@ from pyspark.mllib.recommendation import ALS
 
 RANKS = [10, 20, 30, 40, 50]
 LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
-ITERATIONS = 10
 
 sc = spark.SPARK_CONTEXT
 
@@ -22,7 +21,7 @@ def report_mse_results(outfile, rank, lambda_value, mse, rmse):
 def evaluate_parameters(train, validation, ranks, iterations, lambda_values):
     for rank in ranks:
         for lambda_val in lambda_values:
-            model = ALS.train(train, rank, iterations, lambda_val)
+            model = ALS.train(train, rank, iterations, lambda_val, nonnegative=True)
             mse, rmse = evaluate_model(model, validation)
             yield {
                 "rank": rank,
@@ -59,8 +58,8 @@ def evaluate(train, validation):
         # CSV header
         outfile.write("%s\n" % ",".join(["rank", "lambda", "mse", "rmse"]))
 
-        for result in evaluate_parameters(train, validation, RANKS, ITERATIONS,
-                                          LAMBDA_VALUES):
+        for result in evaluate_parameters(train, validation, RANKS,
+                                          config.ITERATIONS, LAMBDA_VALUES):
             report_mse_results(
                 outfile,
                 result.get("rank"),

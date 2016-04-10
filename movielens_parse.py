@@ -1,4 +1,4 @@
-import csv
+import time
 import config
 
 from pyspark.mllib.recommendation import Rating
@@ -7,6 +7,17 @@ USERID_INDEX = 0
 MOVIEID_INDEX = 1
 RATING_INDEX = 2
 TIMESTAMP_INDEX = 3
+
+
+def parse_user_input(line):
+    parts = line.strip().split(",")
+    current_time = time.time()
+    return (
+        int(parts[USERID_INDEX]),
+        int(parts[MOVIEID_INDEX]),
+        float(parts[RATING_INDEX]),
+        int(current_time)
+    )
 
 
 def parse_line(line):
