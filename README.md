@@ -21,18 +21,18 @@ Given the train-validation-test splits, run the `evaluate_als_models.py` script.
 
 This script will build ALS models from the training set using a range of parameters. The ALS Model parameters and Mean Squared Error (MSE) are written to `results/als_model_evaluation.txt`. The model with the lowest MSE is saved to disk at `results/als_recommended_model`.
 
-### Task 1 - User Recommendations
-To generate new recommendations for a user, execute the `recommend.py` script. This script's CLI supports either an input CSV file, or simply a userId from the existing MovieLens dataset. In both cases, the script will produce 20 new recommendations for the user.
+### Task 1 - MovieLens User Recommendations
+To generate new recommendations for a user, execute the `recommend_ml.py` script. This script's CLI supports either an input CSV file, or simply a userId from the existing MovieLens dataset. In both cases, the script will produce 20 new recommendations for the user.
 
 To make recommendations for a single existing MovieLens user, use the `-u` CLI flag.
 
-        $ ./recommend.py -u 355
+        $ ./recommend_ml.py -u 355
 
 To add new ratings for an existing MovieLens user, provide a CSV file.
 
-        $ ./recommend.py test_users/user2.csv
+        $ ./recommend_ml.py test_users/user2.csv
 
-The CSV file provided to `recommend.py` must consist of lines of exactly `userId,movieId,rating`. No header row should be included. See `test_users/user2.csv` for an example.
+The CSV file provided to `recommend_ml.py` must consist of lines of exactly `userId,movieId,rating`. No header row should be included. See `test_users/user2.csv` for an example.
 
 ### Task 2 - Dimensionality Reduction
 TODO
