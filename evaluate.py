@@ -1,15 +1,13 @@
+import os
 import math
 import config
 import configspark
 import ml_parse
 from pyspark.mllib.recommendation import ALS
 
+RANKS = [10, 20, 30, 40, 50]
+LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
 ITERATIONS = 10
-RANKS = [50]
-LAMBDA_VALUES = [0.01]
-# RANKS = [40, 50]
-# RANKS = [10, 20, 30, 40, 50]
-# LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
 
 sc = configspark.SPARK_CONTEXT
 
@@ -22,11 +20,19 @@ def report_mse_results(outfile, rank, lambda_value, mse, rmse):
 
 def evaluate_parameters(train, validation, ranks, iterations, lambda_values,
                         implicit):
-    tranFunc = ALS.train if implicit else ALS.trainImplicit
+    print("\n")
+    if implicit:
+        print("Training with implicit feedback")
+        trainFunc = ALS.trainImplicit
+    else:
+        print("Training with explicit feedback")
+        trainFunc = ALS.train
+    print("\n")
+
     for rank in ranks:
         for lambda_val in lambda_values:
-            model = tranFunc(train, rank, iterations, lambda_val,
-                             nonnegative=True)
+            model = trainFunc(train, rank, iterations, lambda_val,
+                              nonnegative=True)
 
             mse, rmse = evaluate_model(model, validation)
             yield {
@@ -79,3 +85,15 @@ def evaluate(train, validation, results_filename, implicit=False):
                 min_rmse = result.get("rmse")
 
     return best_result
+
+
+def load_best_params(filename):
+    if not os.path.exists(filename):
+        raise RuntimeError("Cannot locate best ALS parameters file %s"
+                           % filename)
+
+    with open(filename) as infile:
+        lines = [line for line in infile]
+
+    parts = lines[1].strip().split(",")
+    return parts[0], parts[1]

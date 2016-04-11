@@ -38,6 +38,7 @@ MSD_VALIDATION = os.path.join(DATA_PATH, "msd_validation.txt")
 MSD_TEST = os.path.join(DATA_PATH, "msd_test.txt")
 MSD_USERID_MAP = os.path.join(RESULTS_PATH, "msd_user_ids.json")
 MSD_SONGID_MAP = os.path.join(RESULTS_PATH, "msd_song_ids.json")
+MSD_SONGID_REVERSE_MAP = os.path.join(RESULTS_PATH, "msd_song_ids_reverse.json")
 
 MSD_RESULTS_FILE = os.path.join(RESULTS_PATH, "msd_als_model_evaluation.csv")
 MSD_BEST_PARAMS_FILE = os.path.join(RESULTS_PATH, "msd_als_params.csv")
