@@ -48,7 +48,13 @@ The CSV file provided to `ml_recommend.py` must consist of lines of exactly `use
 
 ### Task 2 - Dimensionality Reduction
 
-TODO: Haiwei - document method for running the Task 2 code
+We are curious if reducing bias from dataset can improve recommendation performance. Therefore, we calculate two kinds of bias: item-specific bias and user-specific bias. We want to recalculate the ratings by reducing these bias and compare its performance with previous method in task 1. 
+
+To calculate two types of bias, run the file " hw2_task2.ipynb". 
+
+This will give a new dataset containing the ratings after deduct two types of bias from original ratings values.
+
+After getting the new ratings without bias, we repeated the parameter optimization process in task1 to find the rank and labmda values with minimum RMSE. 
 
 ### Task 3 - Million Song Data Set Recommendations
 
