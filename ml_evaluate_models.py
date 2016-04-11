@@ -28,6 +28,9 @@ def main():
         .map(ml_parse.parse_line)
         .map(ml_parse.rating_convert))
 
+    ratings_train.cache()
+    ratings_validation.cache()
+
     best_result = evaluate.evaluate(ratings_train, ratings_validation,
                                     config.ML_RESULTS_FILE)
     with open(config.ML_BEST_PARAMS_FILE, "w") as outfile:
