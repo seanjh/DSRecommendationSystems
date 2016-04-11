@@ -1,3 +1,4 @@
+import os
 import json
 import config
 from pyspark.mllib.recommendation import Rating
@@ -59,5 +60,25 @@ def replace_raw_ids(train, users, songs):
     convert_row_func = make_row_coverter(users, songs)
     return train.map(convert_row_func)
 
+
+def get_user_song_maps(data):
+    users_map, songs_map = None, None
+    if not os.path.exists(config.MSD_USERID_MAP):
+        print("Generating new user ID map")
+        users_map = msd_parse.make_users_map(data)
+    else:
+        print("Loading user ID map from %s" % config.MSD_USERID_MAP)
+        with open(config.MSD_USERID_MAP) as infile:
+            users_map = json.load(infile)
+
+    if not os.path.exists(config.MSD_SONGID_MAP):
+        print("Generating new song ID map")
+        songs_map = msd_parse.make_songs_map(data)
+    else:
+        print("Loading song ID map from %s" % config.MSD_SONGID_MAP)
+        with open(config.MSD_SONGID_MAP) as infile:
+            songs_map = json.load(infile)
+
+    return users_map, songs_map
 
 # convert user_id, song_id to integer

@@ -78,6 +78,8 @@ def main():
     print("\nTest data sample:\n%s" % ratings_test.take(5))
     ratings_test.saveAsTextFile(config.ML_RATINGS_TEST)
 
+    sc.stop()
+
 
 if __name__ == "__main__":
     main()

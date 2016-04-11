@@ -40,6 +40,8 @@ def main():
     best_model = best_result.get("model")
     best_model.save(sc, config.ML_MODEL)
 
+    sc.stop()
+
 
 if __name__ == "__main__":
     main()

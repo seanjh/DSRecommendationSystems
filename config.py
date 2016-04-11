@@ -28,10 +28,17 @@ if not os.path.exists(RESULTS_PATH):
     os.mkdir(RESULTS_PATH)
 
 # Evaluate results
-RESULTS_FILE = os.path.join(RESULTS_PATH, "als_model_evaluation.csv")
-ALS_BEST_PARAMS_FILE = os.path.join(RESULTS_PATH, "als_params.csv")
+ML_RESULTS_FILE = os.path.join(RESULTS_PATH, "ml_als_model_evaluation.csv")
+ML_BEST_PARAMS_FILE = os.path.join(RESULTS_PATH, "ml_als_params.csv")
 ML_MODEL = os.path.join(RESULTS_PATH, "movielens.mllib.model")
 
-MSD_TRAIN = os.path.join(DATA_PATH, "train_triplets.txt")
+MSD_DATA = os.path.join(DATA_PATH, "train_triplets.txt")
+MSD_TRAIN = os.path.join(DATA_PATH, "msd_train.txt")
+MSD_VALIDATION = os.path.join(DATA_PATH, "msd_validation.txt")
+MSD_TEST = os.path.join(DATA_PATH, "msd_test.txt")
 MSD_USERID_MAP = os.path.join(RESULTS_PATH, "msd_user_ids.json")
 MSD_SONGID_MAP = os.path.join(RESULTS_PATH, "msd_song_ids.json")
+
+MSD_RESULTS_FILE = os.path.join(RESULTS_PATH, "msd_als_model_evaluation.csv")
+MSD_BEST_PARAMS_FILE = os.path.join(RESULTS_PATH, "msd_als_params.csv")
+MSD_MODEL = os.path.join(RESULTS_PATH, "msd.mllib.model")

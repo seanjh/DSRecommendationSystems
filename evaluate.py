@@ -5,8 +5,11 @@ import ml_parse
 from pyspark.mllib.recommendation import ALS
 
 ITERATIONS = 10
-RANKS = [10, 20, 30, 40, 50]
-LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
+RANKS = [50]
+LAMBDA_VALUES = [0.01]
+# RANKS = [40, 50]
+# RANKS = [10, 20, 30, 40, 50]
+# LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
 
 sc = configspark.SPARK_CONTEXT
 
@@ -62,7 +65,7 @@ def evaluate(train, validation, results_filename, implicit=False):
         outfile.write("%s\n" % ",".join(["rank", "lambda", "mse", "rmse"]))
 
         for result in evaluate_parameters(train, validation, RANKS,
-                                          ITERATIONS, LAMBDA_VALUES):
+                                          ITERATIONS, LAMBDA_VALUES, implicit):
             report_mse_results(
                 outfile,
                 result.get("rank"),
