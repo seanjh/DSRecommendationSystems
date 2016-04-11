@@ -56,11 +56,11 @@ The datasplit for Task 3 was performed with the `msd_split.py` script. For recom
 
 To make recommendations for a single existing MSD user, use the `-u` CLI flag.
 
-        $ ./ml_recommend.py -u b80344d063b5ccb3212f76538f3d9e43d87dca9e
+        $ ./msd_recommend.py -u b80344d063b5ccb3212f76538f3d9e43d87dca9e
 
 To add new ratings for an existing MovieLens user, provide a CSV file.
 
-        $ ./ml_recommend.py test_users/msd_test.csv
+        $ ./msd_recommend.py test_users/msd_test.csv
 
 ## Test Results
 
