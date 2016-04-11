@@ -48,13 +48,13 @@ The CSV file provided to `ml_recommend.py` must consist of lines of exactly `use
 
 ### Task 2 - Dimensionality Reduction
 
-We are curious if reducing bias from dataset can improve recommendation performance. Therefore, we calculate two kinds of bias: item-specific bias and user-specific bias. We want to recalculate the ratings by reducing these bias and compare its performance with previous method in task 1. 
+We are curious if reducing bias from dataset can improve recommendation performance. Therefore, we calculate two kinds of bias: item-specific bias and user-specific bias. We want to recalculate the ratings by reducing these bias and compare its performance with previous method in task 1.
 
-To calculate two types of bias, run the file " hw2_task2.ipynb". 
+To calculate two types of bias, run the file " hw2_task2.ipynb".
 
 This will give a new dataset containing the ratings after deduct two types of bias from original ratings values.
 
-After getting the new ratings without bias, we repeated the parameter optimization process in task1 to find the rank and labmda values with minimum RMSE. 
+After getting the new ratings without bias, we repeated the parameter optimization process in task1 to find the rank and labmda values with minimum RMSE.
 
 ### Task 3 - Million Song Data Set Recommendations
 
@@ -78,7 +78,9 @@ Our MovieLens evalution script, `ml_evaluate_models.py`, trained models on all c
 |----|------|---|----|
 |20|0.100000|0.584875|0.764771|
 
-The `ml_test.py` script re-runs the ALS model with these best params, saved in `results/ml_als_params.csv`, against the test dataset. The results of the test run were:
+The full evaluation results are available in `results/ml_als_model_evaluation.csv`.
+
+The `ml_test.py` script makes predictions and evaluates the performance of the test dataset using the ALS model with the best parameters discovered during evaluation. These best parameters are loaded from `results/ml_als_params.csv`. The results of the test run were:
 
 |RMSE|
 |----|
@@ -102,3 +104,4 @@ The `msd_test.py` script re-runs the ALS model with these best params, saved in 
 |----|
 |7.436|
 
+Again, the full results of the validation runs are available in `results/msd_als_model_evaluation.csv`.
