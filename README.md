@@ -90,7 +90,9 @@ HAIWEI: fill in TODOs
 
 ### Task 3 - Million Song Dataset
 
+The `msd_test.py` script re-runs the ALS model with these best params, saved in `results/msd_als_params.csv`, against the test dataset. The results of the test run were:
+
 |RMSE|
 |----|
-|TODO|
+|7.436|
 

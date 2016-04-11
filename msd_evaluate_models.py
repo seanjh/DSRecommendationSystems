@@ -23,7 +23,7 @@ def main():
     # user/song string ID to int ID mappings
     full_text = sc.textFile(config.MSD_DATA)
     full_raw = full_text.map(msd_parse.parse_line)
-    users, songs = msd_parse.get_user_song_maps(full_raw)
+    users, songs, _ = msd_parse.get_user_song_maps(full_raw)
 
     train_parsed = (
         sc.textFile(config.MSD_VALIDATION)
