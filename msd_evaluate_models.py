@@ -11,7 +11,13 @@ import evaluate
 from pyspark.mllib.recommendation import MatrixFactorizationModel
 
 
+def clean():
+    config.clean_path(config.MSD_MODEL)
+
+
 def main():
+    clean()
+
     import configspark
     sc = configspark.SPARK_CONTEXT
 
