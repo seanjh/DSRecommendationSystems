@@ -38,6 +38,9 @@ def main():
                                                    songs)
     validation = validation_prepped.map(msd_parse.rating_convert)
 
+    train.cache()
+    validation.cache()
+
     best_result = evaluate.evaluate(train, validation, config.MSD_RESULTS_FILE,
                                     implicit=True)
 
