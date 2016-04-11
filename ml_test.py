@@ -6,7 +6,7 @@ import config
 import ml_parse as mlparse
 
 from pyspark.mllib.recommendation import MatrixFactorizationModel, ALS
-from ml_evaluate_models import evaluate_model
+from evaluate import evaluate_model
 
 
 def prepare_model(sc):

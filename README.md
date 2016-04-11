@@ -76,7 +76,7 @@ The `ml_test.py` script re-runs the ALS model with these best params, saved in `
 
 |RMSE|
 |----|
-|TODO|
+|0.808|
 
 
 ### Task 2 - MovieLens with dimensionality reduction
