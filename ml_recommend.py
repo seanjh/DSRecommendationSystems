@@ -143,6 +143,8 @@ def main(filename=None, user_id=None):
     make_recommendations(user_id, model, sc.parallelize(user_movies_unwatched),
                          movies)
 
+    sc.stop()
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
