@@ -5,7 +5,6 @@ import os
 import json
 import config
 import msd_parse
-import ml_parse
 import evaluate
 
 from pyspark.mllib.recommendation import MatrixFactorizationModel
@@ -30,14 +29,14 @@ def main():
         sc.textFile(config.MSD_VALIDATION)
         .map(msd_parse.parse_line))
     train_prepped = msd_parse.replace_raw_ids(train_parsed, users, songs)
-    train = train_prepped.map(ml_parse.rating_convert)
+    train = train_prepped.map(msd_parse.rating_convert)
 
     validation_parsed = (
         sc.textFile(config.MSD_VALIDATION)
         .map(msd_parse.parse_line))
     validation_prepped = msd_parse.replace_raw_ids(validation_parsed, users,
                                                    songs)
-    validation = validation_prepped.map(ml_parse.rating_convert)
+    validation = validation_prepped.map(msd_parse.rating_convert)
 
     best_result = evaluate.evaluate(train, validation, config.MSD_RESULTS_FILE,
                                     implicit=True)

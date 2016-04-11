@@ -10,6 +10,25 @@ SONGID_INDEX = 1
 PLAYCOUNT_INDEX = 2
 
 
+def rating_convert(row):
+    return Rating(
+        int(row[USERID_INDEX]),
+        int(row[MOVIEID_INDEX]),
+        int(row[RATING_INDEX])
+    )
+
+
+def parse_user_input(line, users, songs):
+    parts = line.strip().split(",")
+    raw_user_id = parts[USERID_INDEX]
+    raw_song_id = parts[SONGID_INDEX]
+    return (
+        int(users.get(raw_user_id)),
+        int(songs.get(raw_song_id)),
+        int(parts[PLAYCOUNT_INDEX])
+    )
+
+
 def parse_line(line):
     parts = line.strip().split("\t")
     return (
@@ -46,6 +65,13 @@ def make_songs_map(rdd):
     return songs_map
 
 
+def make_songs_reverse_map(songs):
+    reverse = dict([(raw_id, num_id) for (num_id, raw_id) in songs.iteritems()])
+    with open(config.MSD_SONGID_REVERSE_MAP, 'w') as outfile:
+        json.dump(reverse, outfile)
+    return reverse
+
+
 def make_row_coverter(users, songs):
     def convert_row(row):
         return (
@@ -65,20 +91,25 @@ def get_user_song_maps(data):
     users_map, songs_map = None, None
     if not os.path.exists(config.MSD_USERID_MAP):
         print("Generating new user ID map")
-        users_map = msd_parse.make_users_map(data)
+        users_map = make_users_map(data)
     else:
         print("Loading user ID map from %s" % config.MSD_USERID_MAP)
         with open(config.MSD_USERID_MAP) as infile:
             users_map = json.load(infile)
 
-    if not os.path.exists(config.MSD_SONGID_MAP):
-        print("Generating new song ID map")
-        songs_map = msd_parse.make_songs_map(data)
+    if not (os.path.exists(config.MSD_SONGID_MAP) and
+            os.path.exists(config.MSD_SONGID_REVERSE_MAP)):
+        print("Generating new song ID map and reverse map")
+        songs_map = make_songs_map(data)
+        songs_reverse_map = make_songs_reverse_map(songs_map)
     else:
-        print("Loading song ID map from %s" % config.MSD_SONGID_MAP)
+        print("Loading song ID map and reverse map from:\n\t%s\n\t%s"
+              % (config.MSD_SONGID_MAP, config.MSD_SONGID_REVERSE_MAP))
         with open(config.MSD_SONGID_MAP) as infile:
             songs_map = json.load(infile)
+        with open(config.MSD_SONGID_REVERSE_MAP) as infile:
+            songs_reverse_map = json.load(infile)
 
-    return users_map, songs_map
+    return users_map, songs_map, songs_reverse_map
 
 # convert user_id, song_id to integer

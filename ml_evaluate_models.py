@@ -6,9 +6,6 @@ import configspark
 import ml_parse
 import evaluate
 
-RANKS = [10, 20, 30, 40, 50]
-LAMBDA_VALUES = [0.01, 0.1, 1.0, 10.0]
-
 sc = configspark.SPARK_CONTEXT
 
 

@@ -42,12 +42,55 @@ To make recommendations for a single existing MovieLens user, use the `-u` CLI f
 
 To add new ratings for an existing MovieLens user, provide a CSV file.
 
-        $ ./ml_recommend.py test_users/user2.csv
+        $ ./ml_recommend.py test_users/ml_test.csv
 
-The CSV file provided to `ml_recommend.py` must consist of lines of exactly `userId,movieId,rating`. No header row should be included. See `test_users/user2.csv` for an example.
+The CSV file provided to `ml_recommend.py` must consist of lines of exactly `userId,movieId,rating`. No header row should be included. See `test_users/ml_test.csv` for an example.
 
 ### Task 2 - Dimensionality Reduction
-TODO
+
+TODO: Haiwei - document method for running the Task 2 code
 
 ### Task 3 - Million Song Data Set Recommendations
-TODO
+
+The datasplit for Task 3 was performed with the `msd_split.py` script. For recommendations, the interface for Task 3 is identical to the recommendation interface for Task 1, except the `msd_recommend.py` file should be executed. The original User IDs from the Million Song Dataset (MSD) should be passed to the CLI.
+
+To make recommendations for a single existing MSD user, use the `-u` CLI flag.
+
+        $ ./ml_recommend.py -u b80344d063b5ccb3212f76538f3d9e43d87dca9e
+
+To add new ratings for an existing MovieLens user, provide a CSV file.
+
+        $ ./ml_recommend.py test_users/msd_test.csv
+
+## Test Results
+
+### Task 1 - MovieLens
+
+Our MovieLens evalution script, `ml_evaluate_models.py`, trained models on all combinations of ranks `10`, `20`, `30`, `40`, and `50` and λ values `0.01`, `0.1`, `1.0`, `10.0`. When tested on the validation set, the best performing MovieLens model was:
+
+|Rank|λ|MSE|RMSE|
+|----|------|---|----|
+|20|0.100000|0.584875|0.764771|
+
+The `ml_test.py` script re-runs the ALS model with these best params, saved in `results/ml_als_params.csv`, against the test dataset. The results of the test run were:
+
+|RMSE|
+|----|
+|TODO|
+
+
+### Task 2 - MovieLens with dimensionality reduction
+
+HAIWEI: fill in TODOs
+
+|RMSE|
+|----|
+|TODO|
+
+
+### Task 3 - Million Song Dataset
+
+|RMSE|
+|----|
+|TODO|
+
