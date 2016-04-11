@@ -69,12 +69,13 @@ def user_songs_heard(ratings_train, user_id):
         .collect())
 
 
-def unheard_songs(user_id, ratings_train, songs):
+def unheard_songs(user_id, ratings_train, songs, songs_reverse_map):
     # Songs already heard by the user
     heard_song_ids = user_songs_heard(ratings_train, user_id)
     print("\nSongs heard by UserID %s:" % user_id)
     for song_id in heard_song_ids:
-        print("Song ID %s" % song_id)
+        original_song_id = songs_reverse_map.get(str(song_id))
+        print("Song ID %s" % original_song_id)
 
     # filter full songs vector to those not in songs heard by user
     user_songs_unheard = [(user_id, song_id) for song_id in songs.values()
@@ -92,7 +93,7 @@ def prepare_model(sc, filename, user_id, ratings_train):
         model = MatrixFactorizationModel.load(sc, config.MSD_MODEL)
     else:
         # train a new model
-        print("\n\nRetraining recommendation model for User #%s\n\n" % user_id)
+        print("\n\nRetraining recommendation model for User %s\n\n" % user_id)
         rank, lambda_val = (
             evaluate.load_best_params(config.MSD_BEST_PARAMS_FILE))
         rank, lambda_val = int(rank), float(lambda_val)
@@ -108,12 +109,16 @@ def make_recommendations(user_id, model, user_songs, songs_reverse_map):
         predictions
         .sortBy(lambda row: row[msd_parse.PLAYCOUNT_INDEX], ascending=False)
         .take(RECOMMEND_NUM))
+
     print("\nNew song recommendations for User #%s:" % user_id)
     for i, result in enumerate(top_picks):
-        print("#%3d: Song %s, estimated plays: %d"
-              % (i + 1,
-                 songs_reverse_map.get(str(result[msd_parse.SONGID_INDEX])),
-                 result[msd_parse.PLAYCOUNT_INDEX]))
+        predicted_song_id = result[msd_parse.SONGID_INDEX]
+        song_id = str(predicted_song_id)
+        play_count = result[msd_parse.PLAYCOUNT_INDEX]
+
+        print("#%3d: %s, predicted play count: %d"
+              % (i + 1, songs_reverse_map.get(song_id), play_count))
+
     print("\n")
 
 
@@ -135,7 +140,8 @@ def main():
     converted_user_id = users.get(user_id)
     ratings_train = raw_plays.map(msd_parse.rating_convert)
 
-    user_songs_unheard = unheard_songs(converted_user_id, ratings_train, songs)
+    user_songs_unheard = unheard_songs(converted_user_id, ratings_train,
+                                       songs, songs_reverse_map)
 
     model = prepare_model(sc, filename, converted_user_id, ratings_train)
 
