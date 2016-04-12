@@ -89,12 +89,7 @@ The `ml_test.py` script makes predictions and evaluates the performance of the t
 
 ### Task 2 - MovieLens with dimensionality reduction
 
-HAIWEI: fill in TODOs
-
-|RMSE|
-|----|
-|TODO|
-
+In task 2, after we get the new training set with new ratings value, we had some difficulties optimizing the rank and lambda parameters. The issue we had is during model build-up process, the model prediciton is empty. During debugging process, we found that the dataset type we passed into funciton are not the compatible, namely, dataframe against RDD file. Then, we also noticed that the column names between new training dataset and validation dataset does not match. After we fixed this, we rerun the code but still gives us MRE = 0.0 which is impossible in real life. But we assumed that the best parameter is similar to the one chosen from task 1. 
 
 ### Task 3 - Million Song Dataset
 
